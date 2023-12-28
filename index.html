@@ -1,29 +1,50 @@
+<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebSocket UI</title>
-  </head>
-  <body>
-    <div id="currentTime"></div>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+</head>
+<body>
+    <h1>Realtime Status</h1>
+    <div id="status-container"></div>
 
     <script>
-      var currentTimeElement = document.getElementById("currentTime");
-      var socket = new WebSocket("ws://localhost:8080/ws");
+        // Kết nối tới WebSocket server
+        const socket = new WebSocket("ws://localhost:8080/ws");
 
-      socket.onmessage = function (event) {
-        var currentTime = event.data;
+        // Xử lý khi có kết nối thành công
+        socket.addEventListener("open", (event) => {
+            console.log("WebSocket connected");
+        });
 
-        // Update the UI with the received current time
-        updateUI(currentTime);
-      };
+        // Xử lý khi nhận được tin nhắn từ server
+        socket.addEventListener("message", (event) => {
+            const data = JSON.parse(event.data);
+            updateStatus(data);
+        });
 
-      function updateUI(currentTime) {
-        // Update the current time in the UI
-        currentTimeElement.innerHTML = "Current Time: " + currentTime;
-      }
+        // Hàm cập nhật trạng thái
+        function updateStatus(data) {
+            const statusContainer = document.getElementById("status-container");
+            const statusMessage = `Time: ${data.time}, Status: ${data.status ? 'True' : 'False'}`;
+            
+            // Hiển thị thông tin trạng thái
+            statusContainer.innerHTML = statusMessage;
+        }
+
+        // Xử lý khi đóng kết nối
+        socket.addEventListener("close", (event) => {
+            console.log("WebSocket closed");
+        });
+
+        // Xử lý khi có lỗi
+        socket.addEventListener("error", (event) => {
+            console.error("WebSocket error", event);
+        });
     </script>
-  </body>
+</body>
 </html>
